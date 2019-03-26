@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Openclassroom</string>
+    <string name="welcome">"Welcome ! what's your name ?"</string>
+    <string name="field">Please type your name</string>
+    <string name="addButton">"Let's play"</string>
+</resources>
