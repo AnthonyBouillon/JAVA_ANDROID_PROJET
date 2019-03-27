@@ -1,10 +1,16 @@
 package com.example.json;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -19,14 +25,11 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String TAG = MainActivity.class.getSimpleName();
-
     private ProgressDialog pDialog;
-    private ListView lv;
+    private ListView mListView;
+    private Button mViewMore;
 
-    // URL to get contacts JSON
-    private static String url = "https://api.androidhive.info/contacts/";
-
+    // List HasMap key, value
     ArrayList<HashMap<String, String>> contactList;
 
     @Override
@@ -35,9 +38,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         contactList = new ArrayList<>();
-
-        lv = (ListView) findViewById(R.id.list);
+        // activity_main
+        mListView =  findViewById(R.id.list);
+        // Execute the methods of the entire class
         new GetContacts().execute();
+
+
+
+           mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    //String idy = contactList.get(position).get("id");
+                    Intent intent = new Intent(MainActivity.this, ProfilActivity.class);
+                  //  intent.putExtra("id", idy);
+                    startActivity(intent);
+                }
+
+
+            });
+
+
     }
 
     /**
@@ -45,31 +66,37 @@ public class MainActivity extends AppCompatActivity {
      */
     private class GetContacts extends AsyncTask<Void, Void, Void> {
 
+        /**
+         * Barre de chargement
+         */
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog
             pDialog = new ProgressDialog(MainActivity.this);
             pDialog.setMessage("Please wait...");
+            // L'utilisateur ne peut quitter cette fenetre
             pDialog.setCancelable(false);
             pDialog.show();
-
         }
 
+        /**
+         * Traitement
+         * @param arg0
+         * @return
+         */
         @Override
         protected Void doInBackground(Void... arg0) {
-            HttpHandler sh = new HttpHandler();
+            // Call class
+            HttpHandler httpHandler = new HttpHandler();
 
             // Making a request to url and getting response
-            String jsonStr = sh.callHttp(url);
+            String results = httpHandler.callHttp();
 
-            Log.e(TAG, "Response from url: " + jsonStr);
-
-            if (jsonStr != null) {
+            if (results != null) {
                 try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
-
-                    // Getting JSON Array node
+                    JSONObject jsonObj = new JSONObject(results);
+                    // Getting JSON Array node nom du tableau
                     JSONArray contacts = jsonObj.getJSONArray("contacts");
 
                     // looping through All Contacts
@@ -79,14 +106,10 @@ public class MainActivity extends AppCompatActivity {
                         String id = c.getString("id");
                         String name = c.getString("name");
                         String email = c.getString("email");
-                        String address = c.getString("address");
-                        String gender = c.getString("gender");
 
                         // Phone node is JSON Object
                         JSONObject phone = c.getJSONObject("phone");
                         String mobile = phone.getString("mobile");
-                        String home = phone.getString("home");
-                        String office = phone.getString("office");
 
                         // tmp hash map for single contact
                         HashMap<String, String> contact = new HashMap<>();
@@ -101,51 +124,38 @@ public class MainActivity extends AppCompatActivity {
                         contactList.add(contact);
                     }
                 } catch (final JSONException e) {
-                    Log.e(TAG, "Json parsing error: " + e.getMessage());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Json parsing error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    });
-
+                    Log.e("Error", "Json parsing error: " + e.getMessage());
                 }
+
             } else {
-                Log.e(TAG, "Couldn't get json from server.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-                });
-
+                Log.e("Error", "Couldn't get json from server.");
             }
-
             return null;
         }
 
+        /**
+         * When doInBackground() is finish
+         * @param result
+         */
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
+
             // Dismiss the progress dialog
             if (pDialog.isShowing())
                 pDialog.dismiss();
             /**
              * Updating parsed JSON data into ListView
-             * */
-            ListAdapter adapter = new SimpleAdapter(
-                    MainActivity.this, contactList,
-                    R.layout.list_item, new String[]{"name", "email",
-                    "mobile"}, new int[]{R.id.name,
-                    R.id.email, R.id.mobile});
+             * name, email, mobile : key list
+             * namy, email, mobile : id in list_item.xml
+             *
+             * The elements of the list_item.xml are injected into the ListView
+             *
+             **/
+            ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList, R.layout.list_item, new String[]{"name", "email", "mobile"}, new int[]{R.id.namy, R.id.email, R.id.mobile});
+            mListView.setAdapter(adapter);
 
-            lv.setAdapter(adapter);
+
         }
 
     }
