@@ -2,6 +2,7 @@ package com.example.json;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog pDialog;
     private ListView mListView;
     private Button mViewMore;
+    private String idy;
 
     // List HasMap key, value
     ArrayList<HashMap<String, String>> contactList;
@@ -37,26 +40,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        contactList = new ArrayList<>();
-        // activity_main
+        mViewMore = findViewById(R.id.viewMore);
         mListView =  findViewById(R.id.list);
+        contactList = new ArrayList<>();
         // Execute the methods of the entire class
         new GetContacts().execute();
 
 
-
-           mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    //String idy = contactList.get(position).get("id");
-                    Intent intent = new Intent(MainActivity.this, ProfilActivity.class);
-                  //  intent.putExtra("id", idy);
-                    startActivity(intent);
-                }
-
-
-            });
 
 
     }
@@ -154,9 +144,16 @@ public class MainActivity extends AppCompatActivity {
              **/
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList, R.layout.list_item, new String[]{"name", "email", "mobile"}, new int[]{R.id.namy, R.id.email, R.id.mobile});
             mListView.setAdapter(adapter);
-
-
         }
-
     }
+
+public void clickMe(View view){
+
+//        Intent intent = new Intent(MainActivity.this, ProfilActivity.class);
+//        //  intent.putExtra("id", idy);
+//        startActivity(intent);
+    Toast.makeText(this, "Button "+ idy,Toast.LENGTH_LONG).show();
+
+}
+
 }
